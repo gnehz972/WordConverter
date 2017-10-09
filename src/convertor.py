@@ -22,7 +22,7 @@ class FileContrast(QtWidgets.QDialog, UiDialog):
         self.exclude_list = []
         
         # Thread
-        self.bee = Worker(self.process_excel_file, ())
+        self.bee = Worker(self.process_file, ())
 #         self.bee.terminated.connect(self.restoreUi)
 
         # Console handler
@@ -31,14 +31,15 @@ class FileContrast(QtWidgets.QDialog, UiDialog):
         self.dummyEmitter = DummyEmitter();
         self.dummyEmitter.connect(self.update_progress);
 
-    def update_progress(self,msg):
-        print msg
+    def update_progress(self, msg):
+        print(msg)
         self.txt_output.append(msg)
 
     def choose_src(self):
         path, _filter = QtWidgets.QFileDialog.getOpenFileName(self,  u"选择源文件")
+        print(os.path.abspath(path))
         if path:
-            self.src_path.setText(path)
+            self.src_path.setText(os.path.abspath(path))
     
     def process_execute(self):
         self.txt_output.clear()
@@ -59,10 +60,11 @@ class FileContrast(QtWidgets.QDialog, UiDialog):
         if not src:
             return
 
-        splits = src.rsplit(os.sep,1)
-        des = self.raw_string(splits[0]+os.sep + "converted_"+splits[1])
-        timestamp =str(long(time.time()))
-        sf = open(src)
+        splits = src.rsplit(os.path.sep,1)
+        des = self.raw_string(splits[0]+os.path.sep + "converted_"+splits[1])
+        timestamp =str(int(time.time()))
+        # sf = open(src)
+        sf = open(src, 'rb')
         preRead = sf.readline()
         encodeInfo = chardet.detect(preRead)
         ENCODING = encodeInfo['encoding']
@@ -71,7 +73,7 @@ class FileContrast(QtWidgets.QDialog, UiDialog):
 #         print "encoding = "+ENCODING
         out = codecs.open(des,'wb','UTF-8')
         for line in sf: 
-            word = string.split(line, '$$')
+            word = line.split('$$')
             i=0
             for str1 in word:
                 if i==0:
@@ -97,12 +99,14 @@ class FileContrast(QtWidgets.QDialog, UiDialog):
         if not src:
             return
 
-        splits = src.rsplit(os.sep, 1)
+        splits = src.rsplit(os.path.sep, 1)
+        print(os.path.sep)
+        print(splits[0])
         name = splits[1].split(".")[0];
-        des = self.raw_string(splits[0] + os.sep + "converted_" + name+".txt")
+        des = self.raw_string(splits[0] + os.path.sep + "converted_" + name+".txt")
         out = codecs.open(des, 'wb', 'UTF-8')
 
-        timestamp = str(long(time.time()))
+        timestamp = str(int(time.time()))
         data = xlrd.open_workbook(src)
         table = data.sheets()[0]
         nrows = table.nrows
@@ -124,19 +128,19 @@ class FileContrast(QtWidgets.QDialog, UiDialog):
         self.dummyEmitter.signal_msg('输出：' + des)
 
     def raw_string(self,s):
-        if isinstance(s, str):
-            s = s.encode('string-escape')
-        elif isinstance(s, unicode):
-            s = s.encode('unicode-escape')
+        # if isinstance(s, str):
+        #     s = s.encode('unicode_escape')
+        # elif isinstance(s, unicode):
+        #     s = s.encode('unicode-escape')
         return s
 
 
 class XmlProcessor():
     def __init__(self):
-        print ""
+        print("")
 
     def process_xml(self):
-        print ""
+        print("")
 
 
 class Worker(QtCore.QThread):
@@ -162,8 +166,8 @@ class DummyEmitter(QObject):
 if __name__ == "__main__":
     
     # 解决编码为ascii的问题
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
+    # reload(sys)
+    # sys.setdefaultencoding('utf-8')
     
     app = QtWidgets.QApplication(sys.argv)
     dlg = FileContrast()
