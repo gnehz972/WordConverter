@@ -22,7 +22,7 @@ class FileContrast(QtWidgets.QDialog, UiDialog):
         self.exclude_list = []
         
         # Thread
-        self.bee = Worker(self.process_excel_file, ())
+        self.bee = Worker(self.process_file, ())
 #         self.bee.terminated.connect(self.restoreUi)
 
         # Console handler
